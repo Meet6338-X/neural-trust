@@ -32,6 +32,46 @@ NeuralTrust (ChainGuardian) is a comprehensive DeFi risk management platform tha
 
 ---
 
+## 📸 Screenshots
+
+### Python Web Application
+
+| Home Page | Dashboard |
+|-----------|-----------|
+| [![Home Page](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/python/Screenshot%202026-02-12%20222312.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/python/Screenshot%202026-02-12%20222312.png) | [![Dashboard](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/python/Screenshot%202026-02-12%20222357.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/python/Screenshot%202026-02-12%20222357.png) |
+
+| Vault Management | Risk Analysis |
+|------------------|---------------|
+| [![Vault](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/python/Screenshot%202026-02-12%20222414.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/python/Screenshot%202026-02-12%20222414.png) | [![Analysis](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/python/Screenshot%202026-02-12%20222515.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/python/Screenshot%202026-02-12%20222515.png) |
+
+| Audit Log | API Documentation |
+|-----------|-------------------|
+| [![Audit](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/python/Screenshot%202026-02-12%20222530.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/python/Screenshot%202026-02-12%20222530.png) | [![API Docs](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/python/Screenshot%202026-02-12%20222544.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/python/Screenshot%202026-02-12%20222544.png) |
+
+| Health Check | Connected Wallet |
+|--------------|------------------|
+| [![Health](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/python/Screenshot%202026-02-12%20222621.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/python/Screenshot%202026-02-12%20222621.png) | [![Connected](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/python/Screenshot%202026-02-12%20223941.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/python/Screenshot%202026-02-12%20223941.png) |
+
+### Flutter Mobile Application
+
+| Dashboard | Risk Analysis |
+|-----------|---------------|
+| [![Mobile Dashboard](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/mobile/Screenshot%202026-02-10%20164036.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/mobile/Screenshot%202026-02-10%20164036.png) | [![Mobile Risk](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/mobile/Screenshot%202026-02-10%20164054.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/mobile/Screenshot%202026-02-10%20164054.png) |
+
+| Alerts | Profile |
+|--------|---------|
+| [![Mobile Alerts](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/mobile/Screenshot%202026-02-10%20164115.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/mobile/Screenshot%202026-02-10%20164115.png) | [![Mobile Profile](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/mobile/Screenshot%202026-02-10%20164142.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/mobile/Screenshot%202026-02-10%20164142.png) |
+
+| Settings | More Screens |
+|----------|--------------|
+| [![Mobile Settings](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/mobile/Screenshot%202026-02-10%20164214.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/mobile/Screenshot%202026-02-10%20164214.png) | [![More](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/mobile/Screenshot%202026-02-10%20164237.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/mobile/Screenshot%202026-02-10%20164237.png) |
+
+| Additional Screen |
+|-------------------|
+| [![Additional](https://github.com/Meet6338-X/neural-trust/raw/main/Screenshot/mobile/Screenshot%202026-02-10%20164925.png)](https://github.com/Meet6338-X/neural-trust/blob/main/Screenshot/mobile/Screenshot%202026-02-10%20164925.png) |
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -40,29 +80,89 @@ neural-trust/
 │   ├── backend/           # FastAPI Python Backend
 │   │   ├── app/
 │   │   │   ├── api/       # API Routes
+│   │   │   │   ├── routes/        # REST API endpoints
+│   │   │   │   │   ├── analysis.py      # Risk analysis endpoints
+│   │   │   │   │   ├── audit.py         # Audit log endpoints
+│   │   │   │   │   ├── audit_contract.py # Contract auditing
+│   │   │   │   │   ├── vault.py         # Vault management
+│   │   │   │   │   ├── reputation.py    # Address reputation
+│   │   │   │   │   ├── portfolio.py     # Portfolio analysis
+│   │   │   │   │   └── simulate.py      # Transaction simulation
+│   │   │   │   └── websockets/   # WebSocket handlers
 │   │   │   ├── models/    # Database Models
+│   │   │   │   ├── database.py     # SQLAlchemy models
+│   │   │   │   └── schemas.py      # Pydantic schemas
 │   │   │   ├── services/  # Business Logic
+│   │   │   │   ├── ai_engine.py           # AI risk analysis
+│   │   │   │   ├── blockchain_service.py  # Algorand integration
+│   │   │   │   ├── contract_auditor.py    # Contract auditing
+│   │   │   │   ├── reputation_service.py  # Address reputation
+│   │   │   │   ├── portfolio_analyzer.py  # Portfolio analysis
+│   │   │   │   └── transaction_simulator.py # Transaction simulation
 │   │   │   ├── templates/ # Web Templates (Jinja2)
-│   │   │   └── static/    # Static Assets
-│   │   └── requirements.txt
+│   │   │   │   ├── base.html       # Base template
+│   │   │   │   ├── index.html      # Home page
+│   │   │   │   ├── dashboard.html  # Dashboard page
+│   │   │   │   ├── vault.html      # Vault management
+│   │   │   │   ├── analysis.html   # Risk analysis
+│   │   │   │   └── audit.html      # Audit log
+│   │   │   ├── static/    # Static Assets
+│   │   │   │   └── js/main.js      # JavaScript utilities
+│   │   │   ├── config.py   # Configuration
+│   │   │   └── main.py     # FastAPI application
+│   │   ├── test_api.py     # API tests
+│   │   ├── requirements.txt
+│   │   └── .env.template
 │   │
 │   └── contracts/         # Algorand Smart Contracts
 │       └── smart_contracts/
 │           ├── guardian_vault/  # Main Vault Contract
+│           │   ├── contract.py      # Vault contract logic
+│           │   ├── deploy_config.py # Deployment config
+│           │   └── README.md
 │           ├── bank/            # Bank Demo Contract
+│           │   ├── contract.py
+│           │   └── deploy_config.py
 │           └── counter/         # Counter Demo Contract
+│               ├── contract.py
+│               └── deploy_config.py
 │
 ├── NeuralTrust/           # Flutter Mobile App
 │   ├── lib/
-│   │   ├── screens/      # App Screens
-│   │   │   ├── dashboard/   # Main Dashboard
-│   │   │   ├── risk/        # Risk Analysis
-│   │   │   ├── alerts/      # Notifications
-│   │   │   ├── profile/     # User Profile
-│   │   │   └── settings/    # App Settings
-│   │   ├── widgets/      # Reusable Widgets
-│   │   └── theme/        # App Theme
-│   └── pubspec.yaml
+│   │   ├── main.dart           # App entry point
+│   │   ├── app.dart            # App configuration
+│   │   ├── screens/            # App Screens
+│   │   │   ├── dashboard/         # Main Dashboard
+│   │   │   │   └── dashboard_screen.dart
+│   │   │   ├── risk/              # Risk Analysis
+│   │   │   │   └── risk_screen.dart
+│   │   │   ├── alerts/            # Notifications
+│   │   │   │   └── alerts_screen.dart
+│   │   │   ├── profile/           # User Profile
+│   │   │   │   └── profile_screen.dart
+│   │   │   ├── settings/          # App Settings
+│   │   │   │   └── settings_screen.dart
+│   │   │   └── onboarding/        # Get Started
+│   │   │       └── get_started_screen.dart
+│   │   ├── widgets/            # Reusable Widgets
+│   │   │   └── common/
+│   │   │       ├── bottom_nav_bar.dart
+│   │   │       ├── feature_card.dart
+│   │   │       ├── risk_score_card.dart
+│   │   │       └── stats_card.dart
+│   │   └── theme/              # App Theme
+│   │       └── app_theme.dart
+│   ├── pubspec.yaml            # Dependencies
+│   ├── android/                # Android specific
+│   ├── ios/                    # iOS specific
+│   ├── web/                    # Web specific
+│   ├── macos/                  # macOS specific
+│   ├── windows/                # Windows specific
+│   └── linux/                  # Linux specific
+│
+├── Screenshot/            # App Screenshots
+│   ├── python/            # Web app screenshots
+│   └── mobile/            # Mobile app screenshots
 │
 └── plans/                 # Project Documentation
     └── chainguardian-plan.md
@@ -79,7 +179,7 @@ graph TB
     end
     
     subgraph Web Interface
-        WF[Python Web Templates]
+        WF[Python Web Templates - Jinja2]
     end
     
     subgraph Backend
@@ -136,7 +236,7 @@ graph TB
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-repo/neural-trust.git
+git clone https://github.com/Meet6338-X/neural-trust.git
 cd neural-trust
 ```
 
@@ -168,6 +268,7 @@ Open your browser and navigate to:
 - Vault: `http://localhost:8000/vault`
 - Analysis: `http://localhost:8000/analysis`
 - Audit: `http://localhost:8000/audit`
+- API Docs: `http://localhost:8000/docs`
 
 ### 4. Start the Mobile App
 
@@ -237,6 +338,7 @@ The Python-based web interface provides:
 | `/health/detailed` | GET | Detailed service status |
 | `/api/analysis/risk` | POST | Analyze transaction risk |
 | `/api/audit/contract` | POST | Audit smart contract |
+| `/api/audit/contract/patterns` | GET | List vulnerability patterns |
 | `/api/reputation/{address}` | GET | Get address reputation |
 | `/api/portfolio/analyze` | POST | Analyze portfolio risk |
 | `/api/simulate/fees` | GET | Estimate transaction fees |
