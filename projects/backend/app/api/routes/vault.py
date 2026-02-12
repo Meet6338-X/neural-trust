@@ -25,6 +25,76 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/vault", tags=["vault"])
 
 
+@router.get("/status")
+async def get_vault_status(
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """
+    Get vault status for the connected wallet.
+    This endpoint checks if there's a vault for the session.
+    Returns vault status or indicates no vault exists.
+    """
+    return {
+        "vault_address": None,
+        "risk_score": 0,
+        "risk_threshold": 50,
+        "is_frozen": False,
+        "message": "No wallet connected. Please connect your wallet to view vault status."
+    }
+
+
+@router.post("/status", response_model=VaultResponse)
+async def get_vault_status_by_address(
+    request: dict,
+    db: AsyncSession = Depends(get_db),
+    blockchain_service: BlockchainService = Depends(get_blockchain_service)
+) -> VaultResponse:
+    """
+    Get vault information for a user address.
+    
+    Args:
+        request: Request body with user_address
+        db: Database session
+        blockchain_service: Blockchain service dependency
+    
+    Returns:
+        Vault information
+    """
+    address = request.get("user_address") or request.get("address")
+    if not address:
+        raise HTTPException(status_code=400, detail="Address is required")
+    
+    try:
+        # Get from database
+        result = await db.execute(
+            select(Vault).where(Vault.user_address == address)
+        )
+        vault = result.scalar_one_or_none()
+        
+        if not vault:
+            raise HTTPException(status_code=404, detail="Vault not found")
+        
+        # Optionally sync with blockchain
+        on_chain_status = await blockchain_service.get_vault_status(address)
+        if on_chain_status:
+            vault.current_risk_score = on_chain_status.get("risk_score", vault.current_risk_score)
+            vault.is_frozen = on_chain_status.get("is_frozen", vault.is_frozen)
+            await db.commit()
+        
+        return VaultResponse(
+            user_address=vault.user_address,
+            risk_threshold=vault.risk_threshold,
+            current_risk_score=vault.current_risk_score,
+            is_frozen=vault.is_frozen,
+            created_at=vault.created_at,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get vault: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get vault: {str(e)}")
+
+
 @router.post("/create", response_model=VaultResponse)
 async def create_vault(
     request: VaultCreate,

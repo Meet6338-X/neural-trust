@@ -4,13 +4,8 @@ Blockchain service for interacting with GuardianVault smart contract.
 
 import logging
 from typing import Any, Dict, Optional, Tuple
-from algokit_utils import (
-    AlgorandClient,
-    get_algod_client,
-    get_indexer_client,
-)
-from algosdk.v2client.algod import AlgodClient
-from algosdk.v2client.indexer import IndexerClient
+from algosdk.v2client.algod import AlgodClient as SDKAlgodClient
+from algosdk.v2client.indexer import IndexerClient as SDKIndexerClient
 
 from app.config import settings
 
@@ -27,24 +22,22 @@ class BlockchainService:
         """Initialize the blockchain service."""
         self.algod_client = self._get_algod_client()
         self.indexer_client = self._get_indexer_client()
-        self.algorand_client = AlgorandClient(
-            algod_client=self.algod_client,
-            indexer_client=self.indexer_client,
-        )
         self.app_id = settings.GUARDIAN_VAULT_APP_ID
     
-    def _get_algod_client(self) -> AlgodClient:
+    def _get_algod_client(self) -> SDKAlgodClient:
         """Get the Algorand algod client."""
-        return get_algod_client(
-            url=settings.ALGORAND_NODE_URL or "https://testnet-api.algonode.cloud",
-            token=""
+        node_url = settings.ALGORAND_NODE_URL or "https://testnet-api.algonode.cloud"
+        return SDKAlgodClient(
+            algod_address=node_url,
+            algod_token=""
         )
     
-    def _get_indexer_client(self) -> IndexerClient:
+    def _get_indexer_client(self) -> SDKIndexerClient:
         """Get the Algorand indexer client."""
-        return get_indexer_client(
-            url=settings.ALGORAND_INDEXER_URL or "https://testnet-idx.algonode.cloud",
-            token=""
+        indexer_url = settings.ALGORAND_INDEXER_URL or "https://testnet-idx.algonode.cloud"
+        return SDKIndexerClient(
+            indexer_address=indexer_url,
+            indexer_token=""
         )
     
     async def get_vault_status(

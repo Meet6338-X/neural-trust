@@ -3,14 +3,15 @@ Configuration settings for ChainGuardian backend.
 """
 
 from pydantic_settings import BaseSettings
-from typing import Optional
+from typing import Optional, List
+import json
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     
     # OpenRouter API Configuration
-    OPENROUTER_API_KEY: str
+    OPENROUTER_API_KEY: str = ""
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
     AI_MODEL: str = "neuralbase/nemotron-3-nano-30b-a3b:free"
     
@@ -31,7 +32,7 @@ class Settings(BaseSettings):
     API_PREFIX: str = "/api"
     
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:8000", "http://127.0.0.1:8000"]
+    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:8000", "http://127.0.0.1:8000"]
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"
@@ -42,6 +43,15 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
         extra = "ignore"  # Allow extra fields in .env
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Handle CORS_ORIGINS if it's a string
+        if isinstance(self.CORS_ORIGINS, str):
+            try:
+                self.CORS_ORIGINS = json.loads(self.CORS_ORIGINS)
+            except json.JSONDecodeError:
+                self.CORS_ORIGINS = [origin.strip() for origin in self.CORS_ORIGINS.split(',')]
 
 
 # Global settings instance

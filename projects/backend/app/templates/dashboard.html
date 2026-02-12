@@ -8,6 +8,31 @@
     <p class="text-gray-600">Monitor your vault status and risk levels in real-time</p>
 </div>
 
+<!-- Wallet Connection Card -->
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Wallet Connection</h2>
+        <div id="wallet-status-badge"
+            class="px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700">
+            Not Connected
+        </div>
+    </div>
+
+    <div class="flex items-center space-x-4">
+        <div class="flex-1">
+            <p id="wallet-address-display" class="text-sm font-mono text-gray-600">No wallet connected</p>
+        </div>
+        <button id="connect-wallet-btn" onclick="connectWallet()"
+            class="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition">
+            Connect Wallet
+        </button>
+        <button id="disconnect-wallet-btn" onclick="disconnectWallet()"
+            class="px-6 py-2 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition hidden">
+            Disconnect
+        </button>
+    </div>
+</div>
+
 <!-- Vault Status Card -->
 <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
     <div class="flex items-center justify-between mb-6">
@@ -104,21 +129,118 @@
 
 <script>
     let vaultData = null;
+    let connectedWallet = null;
+
+    // Check for saved wallet on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedWallet = localStorage.getItem('chainguardian_wallet');
+        if (savedWallet) {
+            connectedWallet = savedWallet;
+            updateWalletUI();
+            loadVaultStatus();
+        } else {
+            showNoWallet();
+        }
+    });
+
+    async function connectWallet() {
+        // Check if Algorand wallet is available
+        if (typeof window.algorand !== 'undefined') {
+            try {
+                const accounts = await window.algorand.enable();
+                if (accounts && accounts.length > 0) {
+                    connectedWallet = accounts[0].address;
+                    localStorage.setItem('chainguardian_wallet', connectedWallet);
+                    updateWalletUI();
+                    loadVaultStatus();
+                }
+            } catch (error) {
+                console.error('Wallet connection failed:', error);
+                // Fallback: prompt for address manually
+                const address = prompt('Enter your Algorand address:');
+                if (address && address.length === 58) {
+                    connectedWallet = address;
+                    localStorage.setItem('chainguardian_wallet', connectedWallet);
+                    updateWalletUI();
+                    loadVaultStatus();
+                } else if (address) {
+                    alert('Invalid Algorand address. Please enter a valid 58-character address.');
+                }
+            }
+        } else {
+            // No wallet extension, prompt for address
+            const address = prompt('No Algorand wallet extension detected.\n\nEnter your Algorand address manually:');
+            if (address && address.length === 58) {
+                connectedWallet = address;
+                localStorage.setItem('chainguardian_wallet', connectedWallet);
+                updateWalletUI();
+                loadVaultStatus();
+            } else if (address) {
+                alert('Invalid Algorand address. Please enter a valid 58-character address.');
+            }
+        }
+    }
+
+    function disconnectWallet() {
+        connectedWallet = null;
+        localStorage.removeItem('chainguardian_wallet');
+        updateWalletUI();
+        showNoWallet();
+    }
+
+    function updateWalletUI() {
+        const statusBadge = document.getElementById('wallet-status-badge');
+        const addressDisplay = document.getElementById('wallet-address-display');
+        const connectBtn = document.getElementById('connect-wallet-btn');
+        const disconnectBtn = document.getElementById('disconnect-wallet-btn');
+
+        if (connectedWallet) {
+            statusBadge.textContent = 'Connected';
+            statusBadge.className = 'px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700';
+            addressDisplay.textContent = truncateAddress(connectedWallet, 8, 6);
+            connectBtn.classList.add('hidden');
+            disconnectBtn.classList.remove('hidden');
+        } else {
+            statusBadge.textContent = 'Not Connected';
+            statusBadge.className = 'px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700';
+            addressDisplay.textContent = 'No wallet connected';
+            connectBtn.classList.remove('hidden');
+            disconnectBtn.classList.add('hidden');
+        }
+    }
+
+    function truncateAddress(address, start = 6, end = 4) {
+        if (!address) return '--';
+        return `${address.substring(0, start)}...${address.substring(address.length - end)}`;
+    }
 
     async function loadVaultStatus() {
-        try {
-            const response = await fetch('/api/vault/status');
-            const data = await response.json();
+        if (!connectedWallet) {
+            showNoWallet();
+            return;
+        }
 
-            if (data.vault_address) {
+        try {
+            const response = await fetch('/api/vault/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_address: connectedWallet })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
                 vaultData = data;
                 updateDashboard(data);
+            } else if (response.status === 404) {
+                showNoVault();
             } else {
+                const error = await response.json();
+                console.error('Error loading vault:', error);
                 showNoVault();
             }
         } catch (error) {
             console.error('Error loading vault status:', error);
-            showError('Failed to load vault status');
+            showNoVault();
         }
     }
 
@@ -138,34 +260,47 @@
         }
 
         // Update risk score
-        document.getElementById('risk-score').textContent = data.risk_score || 0;
+        document.getElementById('risk-score').textContent = data.current_risk_score || 0;
 
         // Update risk level
-        const riskLevel = getRiskLevel(data.risk_score || 0);
+        const riskLevel = getRiskLevel(data.current_risk_score || 0);
         const riskLevelEl = document.getElementById('risk-level');
         riskLevelEl.textContent = riskLevel.label;
         riskLevelEl.className = `px-3 py-1 rounded-full text-sm font-medium ${riskLevel.bgColor} ${riskLevel.textColor}`;
 
         // Update risk bar
-        document.getElementById('risk-bar').style.width = `${data.risk_score || 0}%`;
+        document.getElementById('risk-bar').style.width = `${data.current_risk_score || 0}%`;
         document.getElementById('risk-bar').className = `risk-bar h-2 rounded-full ${riskLevel.barColor}`;
 
         // Update risk threshold
         document.getElementById('risk-threshold').textContent = data.risk_threshold || 50;
 
         // Update vault address
-        document.getElementById('vault-address').textContent = data.vault_address || 'Not created';
+        document.getElementById('vault-address').textContent = data.user_address || 'Not created';
     }
 
-    function showNoVault() {
-        document.getElementById('vault-status-badge').textContent = 'NOT CREATED';
-        document.getElementById('vault-status-badge').className = 'px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-600';
+    function showNoWallet() {
+        document.getElementById('vault-status-badge').textContent = 'NO WALLET';
+        document.getElementById('vault-status-badge').className = 'px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-600';
         document.getElementById('risk-score').textContent = '--';
         document.getElementById('risk-level').textContent = '--';
         document.getElementById('risk-level').className = 'px-3 py-1 rounded-full text-sm font-medium bg-gray-200 text-gray-700';
         document.getElementById('risk-bar').style.width = '0%';
         document.getElementById('risk-threshold').textContent = '--';
-        document.getElementById('vault-address').textContent = 'Not created';
+        document.getElementById('vault-address').textContent = 'Connect wallet to view';
+        document.getElementById('freeze-btn').disabled = true;
+        document.getElementById('unfreeze-btn').disabled = true;
+    }
+
+    function showNoVault() {
+        document.getElementById('vault-status-badge').textContent = 'NOT CREATED';
+        document.getElementById('vault-status-badge').className = 'px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-600';
+        document.getElementById('risk-score').textContent = '0';
+        document.getElementById('risk-level').textContent = 'SAFE';
+        document.getElementById('risk-level').className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700';
+        document.getElementById('risk-bar').style.width = '0%';
+        document.getElementById('risk-threshold').textContent = '--';
+        document.getElementById('vault-address').textContent = 'No vault found. Create one in the Vault page.';
         document.getElementById('freeze-btn').disabled = true;
         document.getElementById('unfreeze-btn').disabled = true;
     }
@@ -185,6 +320,11 @@
     }
 
     async function freezeVault() {
+        if (!connectedWallet) {
+            alert('Please connect your wallet first');
+            return;
+        }
+
         if (!confirm('Are you sure you want to freeze your vault? This will block all transactions.')) {
             return;
         }
@@ -192,7 +332,8 @@
         try {
             const response = await fetch('/api/vault/freeze', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_address: connectedWallet, reason: 'User initiated freeze' })
             });
             const data = await response.json();
 
@@ -209,6 +350,11 @@
     }
 
     async function unfreezeVault() {
+        if (!connectedWallet) {
+            alert('Please connect your wallet first');
+            return;
+        }
+
         if (!confirm('Are you sure you want to unfreeze your vault?')) {
             return;
         }
@@ -216,7 +362,8 @@
         try {
             const response = await fetch('/api/vault/unfreeze', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_address: connectedWallet })
             });
             const data = await response.json();
 
@@ -235,12 +382,5 @@
     function refreshDashboard() {
         loadVaultStatus();
     }
-
-    function showError(message) {
-        alert(message);
-    }
-
-    // Load vault status on page load
-    document.addEventListener('DOMContentLoaded', loadVaultStatus);
 </script>
 {% endblock %}

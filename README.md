@@ -1,337 +1,405 @@
-### Algorand dApp Quick Start Guide (Base Template)
+# NeuralTrust - AI-Powered DeFi Risk & Compliance Platform
 
-This guide helps non‑technical founders and developers quickly prototype and test Web3 ideas on Algorand using this starter. You’ll set up the project, customize the UI via safe AI prompts, mint tokens and NFTs, and interact with smart contracts.
+<div align="center">
 
-- Repo to fork/clone: `https://github.com/marotipatre/Hackseries-2-QuickStart-template` (source)
-- Works with AlgoKit monorepo structure (contracts + React frontend)
-- Includes prebuilt “cards” demonstrating key patterns:
-  - Counter: simple contract interaction
-  - Bank: complex interaction with contract + Indexer
-  - Asset Create: mint fungible tokens (ASAs)
-  - NFT Mint: upload to IPFS and mint ARC NFTs
-  - Payments: send ALGO and ASA (e.g., USDC)
+![NeuralTrust Banner](https://img.shields.io/badge/NeuralTrust-AI%20Powered%20DeFi%20Protection-blue?style=for-the-badge)
 
-[Base template repo](https://github.com/marotipatre/Hackseries-2-QuickStart-template)
+**AI-Powered Risk Analysis • Smart Contract Auditing • Real-Time Protection**
+
+[![Algorand](https://img.shields.io/badge/Algorand-Blockchain-orange)](https://algorand.com)
+[![Python](https://img.shields.io/badge/Python-3.11+-green)](https://python.org)
+[![Flutter](https://img.shields.io/badge/Flutter-Mobile-blue)](https://flutter.dev)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-teal)](https://fastapi.tiangolo.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+</div>
 
 ---
 
-## 1) Project Setup
+## 🚀 Overview
 
-Prerequisites:
-- Docker (running)
-- Node.js 18+ and npm
-- AlgoKit installed (see official docs)
+NeuralTrust (ChainGuardian) is a comprehensive DeFi risk management platform that combines **off-chain AI intelligence** with **on-chain blockchain enforcement** to protect users from risky or fraudulent financial actions on the Algorand blockchain.
 
-Clone or fork the base template:
+### Key Features
+
+- 🤖 **AI Risk Analysis** - Advanced AI models analyze transactions for potential risks
+- 📝 **Smart Contract Auditing** - Automated vulnerability detection for TEAL and Python contracts
+- 🛡️ **Guardian Vault** - On-chain risk threshold enforcement
+- 📊 **Portfolio Analysis** - Comprehensive risk assessment of your holdings
+- 🔔 **Real-Time Alerts** - WebSocket-based instant notifications
+- 📱 **Mobile App** - Cross-platform Flutter app for iOS, Android, and Web
+- 🌐 **Web Dashboard** - Python-based web interface with Jinja2 templates
+
+---
+
+## 📁 Project Structure
+
+```
+neural-trust/
+├── projects/
+│   ├── backend/           # FastAPI Python Backend
+│   │   ├── app/
+│   │   │   ├── api/       # API Routes
+│   │   │   ├── models/    # Database Models
+│   │   │   ├── services/  # Business Logic
+│   │   │   ├── templates/ # Web Templates (Jinja2)
+│   │   │   └── static/    # Static Assets
+│   │   └── requirements.txt
+│   │
+│   └── contracts/         # Algorand Smart Contracts
+│       └── smart_contracts/
+│           ├── guardian_vault/  # Main Vault Contract
+│           ├── bank/            # Bank Demo Contract
+│           └── counter/         # Counter Demo Contract
+│
+├── NeuralTrust/           # Flutter Mobile App
+│   ├── lib/
+│   │   ├── screens/      # App Screens
+│   │   │   ├── dashboard/   # Main Dashboard
+│   │   │   ├── risk/        # Risk Analysis
+│   │   │   ├── alerts/      # Notifications
+│   │   │   ├── profile/     # User Profile
+│   │   │   └── settings/    # App Settings
+│   │   ├── widgets/      # Reusable Widgets
+│   │   └── theme/        # App Theme
+│   └── pubspec.yaml
+│
+└── plans/                 # Project Documentation
+    └── chainguardian-plan.md
+```
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph TB
+    subgraph Mobile App
+        FL[Flutter App - iOS/Android/Web]
+    end
+    
+    subgraph Web Interface
+        WF[Python Web Templates]
+    end
+    
+    subgraph Backend
+        API[FastAPI Server]
+        AI[AI Risk Engine]
+        WS[WebSocket Server]
+    end
+    
+    subgraph Blockchain
+        ALG[Algorand Network]
+        GV[Guardian Vault Contract]
+    end
+    
+    subgraph External
+        OR[OpenRouter AI]
+        IPFS[IPFS/Pinata]
+    end
+    
+    FL --> API
+    WF --> API
+    API --> AI
+    API --> WS
+    API --> ALG
+    AI --> OR
+    ALG --> GV
+    API --> IPFS
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| **Backend** | Python 3.11+, FastAPI, SQLAlchemy, Pydantic |
+| **AI Engine** | OpenRouter API, Custom Rule Engine |
+| **Blockchain** | Algorand, PyTeal, AlgoKit |
+| **Web Interface** | Jinja2 Templates, TailwindCSS |
+| **Mobile App** | Flutter, Dart |
+| **Database** | SQLite (dev), PostgreSQL (prod) |
+| **Real-Time** | WebSocket |
+| **Storage** | IPFS/Pinata |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- Flutter SDK 3.0+
+- AlgoKit CLI (optional, for smart contracts)
+
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/marotipatre/Hackseries-2-QuickStart-template.git
-cd Hackseries-2-QuickStart-template
+git clone https://github.com/your-repo/neural-trust.git
+cd neural-trust
 ```
 
-Bootstrap the workspace (installs deps, sets up venv, etc.):
+### 2. Start the Backend
 
 ```bash
-algokit project bootstrap all
+cd projects/backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment
+cp .env.template .env
+# Edit .env with your API keys
+
+# Run the server
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Build all projects:
+### 3. Access the Web Dashboard
+
+Open your browser and navigate to:
+- Home: `http://localhost:8000/`
+- Dashboard: `http://localhost:8000/dashboard`
+- Vault: `http://localhost:8000/vault`
+- Analysis: `http://localhost:8000/analysis`
+- Audit: `http://localhost:8000/audit`
+
+### 4. Start the Mobile App
 
 ```bash
-algokit project run build
+cd NeuralTrust
+
+# Get dependencies
+flutter pub get
+
+# Run on device
+flutter run
+
+# Or build for specific platform
+flutter build apk        # Android
+flutter build ios        # iOS
+flutter build web        # Web
 ```
 
-Run the frontend:
+---
+
+## 📱 Mobile App Features
+
+The Flutter mobile app provides a complete mobile experience:
+
+### Screens
+
+| Screen | Description |
+|--------|-------------|
+| **Dashboard** | Overview of vault status, risk scores, and quick actions |
+| **Risk Analysis** | Detailed risk breakdown and transaction analysis |
+| **Alerts** | Real-time notifications and risk warnings |
+| **Profile** | Wallet management and account settings |
+| **Settings** | App preferences and notification controls |
+
+### Platform Support
+
+- ✅ Android (API 21+)
+- ✅ iOS (iOS 12+)
+- ✅ Web (Chrome, Safari, Firefox)
+- ✅ macOS
+- ✅ Windows
+- ✅ Linux
+
+---
+
+## 🌐 Web Dashboard Features
+
+The Python-based web interface provides:
+
+| Page | Description |
+|------|-------------|
+| **Home** | Landing page with project overview |
+| **Dashboard** | Vault status, risk scores, quick actions |
+| **Vault** | Create and manage Guardian Vaults |
+| **Analysis** | AI-powered transaction risk analysis |
+| **Audit** | Smart contract auditing tools |
+
+---
+
+## 🔌 API Endpoints
+
+### Core Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Basic health check |
+| `/health/detailed` | GET | Detailed service status |
+| `/api/analysis/risk` | POST | Analyze transaction risk |
+| `/api/audit/contract` | POST | Audit smart contract |
+| `/api/reputation/{address}` | GET | Get address reputation |
+| `/api/portfolio/analyze` | POST | Analyze portfolio risk |
+| `/api/simulate/fees` | GET | Estimate transaction fees |
+| `/ws/alerts` | WebSocket | Real-time alerts |
+
+### Vault Management
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/vault/create` | POST | Create new vault |
+| `/api/vault/status` | GET/POST | Get vault status |
+| `/api/vault/{address}` | GET/PUT | Get/Update vault |
+| `/api/vault/freeze` | POST | Freeze vault |
+| `/api/vault/unfreeze` | POST | Unfreeze vault |
+
+### Full API Documentation
+
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+---
+
+## ⚙️ Configuration
+
+### Backend Environment Variables
+
+Create `projects/backend/.env`:
+
+```env
+# Algorand Network
+ALGORAND_NETWORK=testnet
+ALGORAND_NODE_URL=https://testnet-api.algonode.cloud
+ALGORAND_INDEXER_URL=https://testnet-idx.algonode.cloud
+
+# AI Configuration
+OPENROUTER_API_KEY=your_openrouter_api_key
+AI_MODEL=anthropic/claude-3-haiku
+
+# API Settings
+API_HOST=0.0.0.0
+API_PORT=8000
+CORS_ORIGINS=["http://localhost:3000","http://localhost:5173"]
+
+# Guardian Vault Contract
+GUARDIAN_VAULT_APP_ID=0
+```
+
+---
+
+## 🧪 Testing
+
+### Backend Tests
 
 ```bash
-cd projects/frontend
-npm install
-npm run dev
+cd projects/backend
+python test_api.py
 ```
 
-Optional: alternative starter to compare or borrow patterns from:
+### Smart Contract Tests
 
 ```bash
-git clone https://github.com/Ganainmtech/Algorand-dApp-Quick-Start-Template-TypeScript.git
+cd projects/contracts
+pytest tests/
 ```
 
-References:
-- Algorand Developer Portal: `https://dev.algorand.co/`
-- AlgoKit Workshops: `https://algorand.co/algokit-workshops`
-- Algodevs YouTube: `https://www.youtube.com/@algodevs`
-
----
-
-## 2) Required environment variables (Frontend)
-
-Create `projects/frontend/.env` with the following values for TestNet (adjust as needed):
+### Mobile App Tests
 
 ```bash
-# Network (Algod)
-VITE_ALGOD_SERVER=https://testnet-api.algonode.cloud
-VITE_ALGOD_PORT=
-VITE_ALGOD_TOKEN=
-VITE_ALGOD_NETWORK=testnet
-
-# Indexer (for Bank/indexed reads)
-VITE_INDEXER_SERVER=https://testnet-idx.algonode.cloud
-VITE_INDEXER_PORT=
-VITE_INDEXER_TOKEN=
-
-# Optional: KMD (if using a local KMD wallet)
-VITE_KMD_SERVER=http://localhost
-VITE_KMD_PORT=4002
-VITE_KMD_TOKEN=a-super-secret-token
-VITE_KMD_WALLET=unencrypted-default-wallet
-VITE_KMD_PASSWORD=some-password
-
-# Pinata (NFT media + metadata to IPFS)
-# Generate a JWT in Pinata and paste below
-VITE_PINATA_JWT=eyJhbGciOi...  # JWT from Pinata
-# Optional: custom gateway
-VITE_PINATA_GATEWAY=https://gateway.pinata.cloud/ipfs
-```
-
-Notes:
-- Algod/Indexer config is read by `src/utils/network/getAlgoClientConfigs.ts`:
-  - `VITE_ALGOD_SERVER`, `VITE_ALGOD_PORT`, `VITE_ALGOD_TOKEN`, `VITE_ALGOD_NETWORK`
-  - `VITE_INDEXER_SERVER`, `VITE_INDEXER_PORT`, `VITE_INDEXER_TOKEN`
-- Pinata integration expects `VITE_PINATA_JWT` and optional `VITE_PINATA_GATEWAY` for NFT uploads (see `src/utils/pinata.ts`).
-- Restart the dev server after editing `.env`.
-
-Pinata API keys/JWT: create via Pinata dashboard `https://app.pinata.cloud/developers/api-keys` and use the generated JWT.
-
----
-
-## 3) Project map (what to tweak)
-
-Frontend location: `projects/frontend`
-
-Key files:
-- `src/Home.tsx` — Landing page
-- `src/components/Transact.tsx` — Payments (ALGO, template for ASA)
-- `src/components/Bank.tsx` — Contract + Indexer demo (deploy, deposit, withdraw, statements, depositors)
-- `src/components/CreateASA.tsx` — Create fungible tokens (ASA)
-- `src/components/MintNFT.tsx` — Mint NFTs with IPFS media/metadata
-- `src/components/AppCalls.tsx` — Example app call wiring to a contract
-- `src/utils/pinata.ts` — Pinata IPFS utilities (file/JSON pin)
-- `src/utils/network/getAlgoClientConfigs.ts` — Network configs from Vite env
-
-Contracts (generated artifacts, clients):
-- `projects/contracts/smart_contracts/**` and `projects/frontend/src/contracts/**`
-
----
-
-## 4) Use AI to redesign UI safely (keep logic intact)
-
-How to work:
-1) Open the target file and copy its full contents.
-2) Paste into your AI tool (ChatGPT/Claude/Gemini).
-3) Use the corresponding prompt below to redesign using TailwindCSS.
-4) Replace only JSX/markup/styles. Do NOT change logic, imports, props, state, handlers, or function calls.
-
-### 4.1 Home (Landing Page)
-
-File: `projects/frontend/src/Home.tsx`
-
-Prompt:
-```
-I'm building an Algorand dApp and want to improve the design of my landing page in projects/frontend/src/Home.tsx. Please redesign the layout using modern web design principles with TailwindCSS. Include:
-- A visually striking hero section with a short headline and subheading
-- A primary call-to-action button that navigates to key features
-- A simple feature grid that highlights the cards: Counter, Bank, Payments, Create Token (ASA), Mint NFT
-- Balanced spacing, responsive design (mobile/desktop), and a Web3/tech-style color theme
-Keep ALL existing logic for wallet connection, navigation, event handlers, and button states EXACTLY as they are — do not change any logic or data flow. Only change the JSX structure and Tailwind classes.
-```
-
-### 4.2 Payments (Transact)
-
-File: `projects/frontend/src/components/Transact.tsx`
-
-Prompt:
-```
-I'm building a payments dApp on Algorand that allows users to send ALGO or USDC to others. I’ve pasted the existing projects/frontend/src/components/Transact.tsx which already contains transaction logic. Please redesign this component using TailwindCSS to look like a clean, modern payment interface:
-- Clear inputs for recipient address and read-only display for amount (1 ALGO in this example)
-- A prominent Send button
-- Helpful labels, subtle validation states, and a simple success message area
-- Responsive, minimal Web3 design aesthetic
-Keep ALL wallet and transaction logic EXACTLY as it is — do not change any function names, props, state variables, or event handlers.
-```
-
-Optional extension prompt (ASA like USDC):
-```
-Extend the UI design to optionally switch between sending ALGO or an ASA (e.g., USDC) without changing existing ALGO logic. Only provide additional JSX blocks and Tailwind classes; do not modify or remove the current payment logic. You can add a new tab-like UI and mock disabled form fields for ASA to show the final look-and-feel.
-```
-
-### 4.3 Bank (Complex contract + Indexer)
-
-File: `projects/frontend/src/components/Bank.tsx`
-
-Prompt:
-```
-This is a "Bank" demo that shows a more complex Algorand contract integration with Indexer queries, boxes, and inner transactions. I’ve pasted projects/frontend/src/components/Bank.tsx. Please enhance the UI with TailwindCSS:
-- Clear App ID input and App Address display
-- Two panels: Deposit (memo + amount) and Withdraw (amount)
-- A status area for loading/spinners and action feedback
-- Paginated, scrollable Statements and Depositors lists, with clear labels and link to explorer
-- Keep it responsive and professional with a dashboard feel
-Do NOT change any logic, props, function names, or data fetching. Only adjust JSX structure and Tailwind classes.
-```
-
-### 4.4 Create ASA (Fungible tokens)
-
-File: `projects/frontend/src/components/CreateASA.tsx`
-
-Prompt:
-```
-I'm building a loyalty/stablecoin-like token on Algorand. I’ve included projects/frontend/src/components/CreateASA.tsx with working ASA creation logic. Please redesign the component using TailwindCSS to present a professional token creation form:
-- Inputs: Token Name, Unit/Symbol, Decimals, Total Supply (base units)
-- A clear, primary "Create Token" button with loading/disabled states
-- A compact help text about each field
-- Minimal dashboard style consistent with the rest of the app
-Keep ALL minting and wallet logic EXACTLY as-is — change ONLY layout and Tailwind classes.
-```
-
-### 4.5 Mint NFT (IPFS + ARC NFT)
-
-File: `projects/frontend/src/components/MintNFT.tsx`
-
-Prompt:
-```
-I'm building an Algorand-based NFT dApp that allows users to mint digital collectibles. I’ve pasted projects/frontend/src/components/MintNFT.tsx which already includes upload to IPFS and NFT mint logic. Please redesign using TailwindCSS:
-- Upload field for image/file with preview
-- Inputs for Name and Description
-- Display upload and mint progress (spinners, progress bars, small status messages)
-- A primary "Mint NFT" button with clear disabled/loading states
-- A link to view the NFT/metadata via the configured IPFS gateway
-Keep ALL wallet, IPFS (Pinata), and minting logic EXACTLY as-is — modify only JSX and Tailwind classes.
+cd NeuralTrust
+flutter test
 ```
 
 ---
 
-## 5) NFT Environment (Pinata + IPFS)
+## 📊 Features Deep Dive
 
-- Create Pinata API Key/JWT: `https://app.pinata.cloud/developers/api-keys`
-- Put JWT in `projects/frontend/.env` as `VITE_PINATA_JWT`
-- Optional: set `VITE_PINATA_GATEWAY` to your preferred gateway
-- Restart dev server after changing `.env`:
+### AI Risk Analysis
 
-```bash
-npm run dev
-```
+The AI engine analyzes transactions using:
+- Pattern matching for known attack vectors
+- Historical transaction analysis
+- Protocol-specific risk assessment
+- Real-time threat intelligence
 
-NFT flow uses:
-- `src/utils/pinata.ts` (expects `VITE_PINATA_JWT`, optional `VITE_PINATA_GATEWAY`)
-- `pinFileToIPFS` and `pinJSONToIPFS` endpoints
+### Smart Contract Auditor
 
----
+Detects vulnerabilities including:
+- Reentrancy attacks
+- Integer overflow/underflow
+- Unprotected access control
+- Front-running vulnerabilities
+- Unbounded loops
+- Missing error handling
 
-## 6) Smart Contract interaction basics
+### Guardian Vault
 
-- Example TS clients are generated into `projects/frontend/src/contracts`
-- Frontend demo wiring in `src/components/AppCalls.tsx`
-- Use Bank/Counter cards to explore app call patterns, boxes, and Indexer usage
-
-Learn more:
-- Algorand Dev Portal: `https://dev.algorand.co/`
-- AlgoKit Workshops: `https://algorand.co/algokit-workshops`
-- Algodevs YouTube: `https://www.youtube.com/@algodevs`
-
----
-
-## 7) Card overview and tweak ideas
-
-- Counter
-  - Purpose: Simple app call demonstration
-  - Tweak: Typography, spacing, and success toast placement
-  - AI tip: “Add a hero-like header; keep all state/handlers/contract calls unchanged.”
-
-- Bank
-  - Purpose: Complex contract with deposit/withdraw and Indexer reads
-  - Tweak: Two-column layout, data tables with pagination, explorer links
-  - AI tip: “Make statements/depositors scrollable; maintain all function names and handlers.”
-
-- Payments (Transact)
-  - Purpose: Send ALGO (and optionally mock ASA UI)
-  - Tweak: Input clarity, action emphasis, subtle validation messaging
-  - AI tip: “Keep existing ALGO logic identical; ASA tab as UI-only demo.”
-
-- Create ASA
-  - Purpose: Mint fungible token
-  - Tweak: Professional form design, helper text for decimals/total
-  - AI tip: “Do not change the `algorand.send.assetCreate` call; style form and loading states.”
-
-- Mint NFT
-  - Purpose: Upload media/metadata to IPFS, mint an ARC NFT
-  - Tweak: File upload preview, progress messages, gateway links
-  - AI tip: “Keep Pinata calls and NFT mint logic intact; enhance UI and progress indicators.”
+On-chain protection mechanism:
+- User-defined risk thresholds
+- Automatic transaction blocking
+- Emergency freeze capability
+- Immutable audit logging
 
 ---
 
-## 8) Troubleshooting
+## 🔐 Security
 
-- “Missing VITE_ALGOD_SERVER”
-  - Ensure `.env` exists in `projects/frontend` and values are set
-  - Restart `npm run dev`
-
-- “Missing VITE_PINATA_JWT” or IPFS upload fails
-  - Generate JWT in Pinata dashboard and add to `.env`
-  - Confirm gateway works or remove custom gateway (defaults to `https://ipfs.io/ipfs`)
-
-- Indexer queries return empty
-  - Verify `VITE_INDEXER_SERVER` is a TestNet Indexer and `VITE_ALGOD_NETWORK=testnet`
-  - Confirm correct App ID in Bank card
-
-- Transactions fail
-  - Ensure wallet is connected and funded
-  - For Bank, input a valid App ID or deploy via the card
+- All sensitive data encrypted at rest
+- API keys stored securely in environment variables
+- WebSocket connections authenticated
+- Rate limiting on all endpoints
+- Input validation with Pydantic
 
 ---
 
-## 9) CI/CD (Optional)
+## 📈 Roadmap
 
-- Integrate with GitHub Actions for lint/type/test and deployments.
-- Deploy smart contracts via `algokit deploy`.
-- Deploy frontend to Vercel/Netlify; add these `.env` variables to hosting settings.
-
----
-
-## 10) Copy‑ready AI Prompt Snippets
-
-Use these verbatim as you work card‑by‑card:
-
-- Home:
-```
-Redesign projects/frontend/src/Home.tsx using TailwindCSS for a modern Web3 landing page with a strong hero, concise subtitle, and a grid of feature cards (Counter, Bank, Payments, Create Token, Mint NFT). Keep all wallet/navigation logic, props, and handlers EXACTLY as-is. Modify only JSX and Tailwind classes.
-```
-
-- Transact:
-```
-Redesign projects/frontend/src/components/Transact.tsx into a clean payments UI (recipient input, 1 ALGO send button, success message area). Keep ALL existing logic and handlers unchanged. Modify only JSX/Tailwind. Optionally add an ASA tab UI mock without changing logic.
-```
-
-- Bank:
-```
-Enhance projects/frontend/src/components/Bank.tsx with a dashboard feel: App ID input, deploy section, deposit/withdraw cards, scrollable statements and depositors lists with explorer links. Maintain ALL logic and calls as-is; only update layout and Tailwind classes.
-```
-
-- Create ASA:
-```
-Redesign projects/frontend/src/components/CreateASA.tsx to a professional token creation form with inputs (Name, Unit, Decimals, Total), helper text, and a prominent Create button with loading state. Keep all ASA creation logic intact; change only JSX/Tailwind.
-```
-
-- Mint NFT:
-```
-Redesign projects/frontend/src/components/MintNFT.tsx for a sleek NFT minter: file upload with preview, name/description fields, visible Mint button, and progress indicators. Keep Pinata, IPFS, and mint logic untouched; only adjust JSX/Tailwind.
-```
+- [ ] Multi-chain support (Ethereum, Polygon)
+- [ ] Advanced AI models integration
+- [ ] Social recovery for vaults
+- [ ] DAO governance
+- [ ] Mobile push notifications
+- [ ] Hardware wallet support
 
 ---
 
-Links cited:
-- Base template repo: [marotipatre/Hackseries-2-QuickStart-template](https://github.com/marotipatre/Hackseries-2-QuickStart-template)
-- Algorand Developer Portal: `https://dev.algorand.co/`
-- AlgoKit Workshops: `https://algorand.co/algokit-workshops`
-- Algodevs YouTube: `https://www.youtube.com/@algodevs`
-- Pinata API Keys: `https://app.pinata.cloud/developers/api-keys`
+## 🤝 Contributing
 
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Algorand Foundation](https://algorand.foundation) for blockchain infrastructure
+- [AlgoKit](https://github.com/algorandfoundation/algokit-cli) for development tools
+- [OpenRouter](https://openrouter.ai) for AI model access
+- [Pinata](https://pinata.cloud) for IPFS storage
+
+---
+
+## 📞 Support
+
+- Documentation: [docs.neuraltrust.io](https://docs.neuraltrust.io)
+- Discord: [discord.gg/neuraltrust](https://discord.gg/neuraltrust)
+- Twitter: [@NeuralTrust](https://twitter.com/NeuralTrust)
+- Email: support@neuraltrust.io
+
+---
+
+<div align="center">
+
+**Built with ❤️ by the NeuralTrust Team**
+
+© 2026 NeuralTrust. All rights reserved.
+
+</div>

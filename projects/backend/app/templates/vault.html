@@ -8,6 +8,31 @@
     <p class="text-gray-600">Create and manage your Guardian Vault with custom risk thresholds</p>
 </div>
 
+<!-- Wallet Connection Card -->
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Wallet Connection</h2>
+        <div id="wallet-status-badge"
+            class="px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700">
+            Not Connected
+        </div>
+    </div>
+
+    <div class="flex items-center space-x-4">
+        <div class="flex-1">
+            <p id="wallet-address-display" class="text-sm font-mono text-gray-600">No wallet connected</p>
+        </div>
+        <button id="connect-wallet-btn" onclick="connectWallet()"
+            class="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition">
+            Connect Wallet
+        </button>
+        <button id="disconnect-wallet-btn" onclick="disconnectWallet()"
+            class="px-6 py-2 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition hidden">
+            Disconnect
+        </button>
+    </div>
+</div>
+
 <!-- Vault Creation Form -->
 <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
     <h2 class="text-xl font-semibold text-gray-900 mb-6">Create New Vault</h2>
@@ -27,19 +52,6 @@
             </div>
             <p class="text-xs text-gray-500 mt-2">
                 Transactions with a risk score above this threshold will be blocked by the smart contract.
-            </p>
-        </div>
-
-        <div class="mb-6">
-            <label for="wallet-address" class="block text-sm font-medium text-gray-700 mb-2">
-                Wallet Address
-            </label>
-            <input type="text" id="wallet-address" name="wallet_address"
-                placeholder="Enter your Algorand wallet address"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required>
-            <p class="text-xs text-gray-500 mt-2">
-                The wallet address that will own this vault.
             </p>
         </div>
 
@@ -137,36 +149,131 @@
 
 <script>
     let vaultData = null;
+    let connectedWallet = null;
+
+    // Check for saved wallet on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedWallet = localStorage.getItem('chainguardian_wallet');
+        if (savedWallet) {
+            connectedWallet = savedWallet;
+            updateWalletUI();
+            loadVaultStatus();
+        }
+    });
+
+    async function connectWallet() {
+        // Check if Algorand wallet is available
+        if (typeof window.algorand !== 'undefined') {
+            try {
+                const accounts = await window.algorand.enable();
+                if (accounts && accounts.length > 0) {
+                    connectedWallet = accounts[0].address;
+                    localStorage.setItem('chainguardian_wallet', connectedWallet);
+                    updateWalletUI();
+                    loadVaultStatus();
+                }
+            } catch (error) {
+                console.error('Wallet connection failed:', error);
+                // Fallback: prompt for address manually
+                const address = prompt('Enter your Algorand address:');
+                if (address && address.length === 58) {
+                    connectedWallet = address;
+                    localStorage.setItem('chainguardian_wallet', connectedWallet);
+                    updateWalletUI();
+                    loadVaultStatus();
+                } else if (address) {
+                    alert('Invalid Algorand address. Please enter a valid 58-character address.');
+                }
+            }
+        } else {
+            // No wallet extension, prompt for address
+            const address = prompt('No Algorand wallet extension detected.\n\nEnter your Algorand address manually:');
+            if (address && address.length === 58) {
+                connectedWallet = address;
+                localStorage.setItem('chainguardian_wallet', connectedWallet);
+                updateWalletUI();
+                loadVaultStatus();
+            } else if (address) {
+                alert('Invalid Algorand address. Please enter a valid 58-character address.');
+            }
+        }
+    }
+
+    function disconnectWallet() {
+        connectedWallet = null;
+        localStorage.removeItem('chainguardian_wallet');
+        updateWalletUI();
+        hideExistingVault();
+    }
+
+    function updateWalletUI() {
+        const statusBadge = document.getElementById('wallet-status-badge');
+        const addressDisplay = document.getElementById('wallet-address-display');
+        const connectBtn = document.getElementById('connect-wallet-btn');
+        const disconnectBtn = document.getElementById('disconnect-wallet-btn');
+
+        if (connectedWallet) {
+            statusBadge.textContent = 'Connected';
+            statusBadge.className = 'px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700';
+            addressDisplay.textContent = truncateAddress(connectedWallet, 8, 6);
+            connectBtn.classList.add('hidden');
+            disconnectBtn.classList.remove('hidden');
+        } else {
+            statusBadge.textContent = 'Not Connected';
+            statusBadge.className = 'px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700';
+            addressDisplay.textContent = 'No wallet connected';
+            connectBtn.classList.remove('hidden');
+            disconnectBtn.classList.add('hidden');
+        }
+    }
+
+    function truncateAddress(address, start = 6, end = 4) {
+        if (!address) return '--';
+        return `${address.substring(0, start)}...${address.substring(address.length - end)}`;
+    }
 
     async function loadVaultStatus() {
-        try {
-            const response = await fetch('/api/vault/status');
-            const data = await response.json();
+        if (!connectedWallet) {
+            hideExistingVault();
+            return;
+        }
 
-            if (data.vault_address) {
+        try {
+            const response = await fetch('/api/vault/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_address: connectedWallet })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
                 vaultData = data;
                 showExistingVault(data);
+            } else if (response.status === 404) {
+                hideExistingVault();
             } else {
+                console.error('Error loading vault');
                 hideExistingVault();
             }
         } catch (error) {
             console.error('Error loading vault status:', error);
+            hideExistingVault();
         }
     }
 
     function showExistingVault(data) {
         document.getElementById('existing-vault-section').classList.remove('hidden');
-        document.getElementById('vault-address-display').textContent = data.vault_address;
+        document.getElementById('vault-address-display').textContent = data.user_address || '--';
         document.getElementById('current-threshold-display').textContent = data.risk_threshold || 50;
-        document.getElementById('current-risk-display').textContent = data.risk_score || 0;
+        document.getElementById('current-risk-display').textContent = data.current_risk_score || 0;
 
         const statusDisplay = document.getElementById('vault-status-display');
         if (data.is_frozen) {
             statusDisplay.textContent = 'FROZEN';
-            statusDisplay.className = 'font-semibold text-red-300';
+            statusDisplay.className = 'font-semibold text-red-600';
         } else {
             statusDisplay.textContent = 'ACTIVE';
-            statusDisplay.className = 'font-semibold text-green-300';
+            statusDisplay.className = 'font-semibold text-green-600';
         }
 
         // Set update threshold to current value
@@ -189,11 +296,16 @@
     async function createVault(event) {
         event.preventDefault();
 
+        if (!connectedWallet) {
+            alert('Please connect your wallet first');
+            return;
+        }
+
         const form = event.target;
         const formData = new FormData(form);
 
         const data = {
-            wallet_address: formData.get('wallet_address'),
+            user_address: connectedWallet,
             risk_threshold: parseInt(formData.get('risk_threshold'))
         };
 
@@ -229,6 +341,11 @@
     async function updateVault(event) {
         event.preventDefault();
 
+        if (!connectedWallet) {
+            alert('Please connect your wallet first');
+            return;
+        }
+
         const form = event.target;
         const formData = new FormData(form);
 
@@ -241,8 +358,8 @@
         btn.textContent = 'Updating...';
 
         try {
-            const response = await fetch('/api/vault/update', {
-                method: 'POST',
+            const response = await fetch(`/api/vault/${connectedWallet}`, {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
@@ -262,8 +379,5 @@
             btn.textContent = 'Update Vault Threshold';
         }
     }
-
-    // Load vault status on page load
-    document.addEventListener('DOMContentLoaded', loadVaultStatus);
 </script>
 {% endblock %}
