@@ -480,24 +480,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Acknowledgments
-
-- [Algorand Foundation](https://algorand.foundation) for blockchain infrastructure
-- [AlgoKit](https://github.com/algorandfoundation/algokit-cli) for development tools
-- [OpenRouter](https://openrouter.ai) for AI model access
-- [Pinata](https://pinata.cloud) for IPFS storage
-
----
-
-## 📞 Support
-
-- Documentation: [docs.neuraltrust.io](https://docs.neuraltrust.io)
-- Discord: [discord.gg/neuraltrust](https://discord.gg/neuraltrust)
-- Twitter: [@NeuralTrust](https://twitter.com/NeuralTrust)
-- Email: support@neuraltrust.io
-
----
-
 <div align="center">
 
 **Built with ❤️ by the NeuralTrust Team**

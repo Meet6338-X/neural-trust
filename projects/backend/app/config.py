@@ -13,7 +13,12 @@ class Settings(BaseSettings):
     # OpenRouter API Configuration
     OPENROUTER_API_KEY: str = ""
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
-    AI_MODEL: str = "neuralbase/nemotron-3-nano-30b-a3b:free"
+    AI_MODEL: str = "nvidia/nemotron-3-nano-30b-a3b:free"
+    
+    # LoRa Network Configuration
+    LORA_ENABLED: bool = True
+    LORA_API_URL: str = "https://api.lorawan.network/v1"
+    LORA_API_KEY: str = ""
     
     # Algorand Configuration
     ALGORAND_NETWORK: str = "testnet"

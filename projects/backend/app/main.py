@@ -17,7 +17,9 @@ from fastapi.templating import Jinja2Templates
 from app.config import settings
 from app.models.database import init_db
 from app.api.routes import analysis, vault, audit, audit_contract, reputation, portfolio, simulate
+from app.api.routes import blockchain, chatbot
 from app.api.websockets.alerts import websocket_handler, manager
+from app.services.asset_protection import asset_protection_router
 
 # Configure logging
 logging.basicConfig(
@@ -170,6 +172,9 @@ app.include_router(audit_contract.router, prefix=settings.API_PREFIX)
 app.include_router(reputation.router, prefix=settings.API_PREFIX)
 app.include_router(portfolio.router, prefix=settings.API_PREFIX)
 app.include_router(simulate.router, prefix=settings.API_PREFIX)
+app.include_router(blockchain.router, prefix=settings.API_PREFIX)
+app.include_router(chatbot.router, prefix=settings.API_PREFIX)
+app.include_router(asset_protection_router, prefix=settings.API_PREFIX)
 
 
 # Health check endpoint
@@ -305,10 +310,28 @@ async def vault_page(request: Request):
     return templates.TemplateResponse("vault.html", {"request": request})
 
 
-@app.get("/analysis", response_class=HTMLResponse, tags=["web"])
-async def analysis_page(request: Request):
-    """AI Analysis page."""
-    return templates.TemplateResponse("analysis.html", {"request": request})
+@app.get("/blockchain", response_class=HTMLResponse, tags=["web"])
+async def blockchain_page(request: Request):
+    """Blockchain management page."""
+    return templates.TemplateResponse("blockchain.html", {"request": request})
+
+
+@app.get("/asset-protection", response_class=HTMLResponse, tags=["web"])
+async def asset_protection_page(request: Request):
+    """Asset Protection page."""
+    return templates.TemplateResponse("asset_protection.html", {"request": request})
+
+
+@app.get("/quick-analysis", response_class=HTMLResponse, tags=["web"])
+async def quick_analysis_page(request: Request):
+    """Quick Address Analysis page - simplified input."""
+    return templates.TemplateResponse("simple_analysis.html", {"request": request})
+
+
+@app.get("/chatbot", response_class=HTMLResponse, tags=["web"])
+async def chatbot_page(request: Request):
+    """AI Chatbot page."""
+    return templates.TemplateResponse("chatbot.html", {"request": request})
 
 
 @app.get("/audit", response_class=HTMLResponse, tags=["web"])
@@ -357,4 +380,5 @@ if __name__ == "__main__":
         port=settings.API_PORT,
         reload=True,
     )
+ 
  

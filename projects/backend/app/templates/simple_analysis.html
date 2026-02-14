@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Quick Analysis - ChainGuardian{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Quick Address Analysis</h1>
+    <p class="text-gray-600">Enter an Algorand address to get a comprehensive risk report</p>
+</div>
+
+<!-- Simple Input Form -->
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">Analyze Address</h2>
+
+    <form id="simple-analysis-form" onsubmit="analyzeAddress(event)">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                    Algorand Address
+                </label>
+                <input type="text" id="address" name="address"
+                    placeholder="Enter Algorand address (e.g., FR3DXSMXLGF7QOEYMYSYN3RV3UNFEYEK2RF2P3PAXXTKFNRASPRFADPD34)"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                    required>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" id="analyze-btn"
+                    class="w-full md:w-auto bg-blue-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-lg">
+                    Analyze
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Loading State -->
+<div id="loading-state" class="hidden mb-8">
+    <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-gray-600 text-lg">Analyzing address...</p>
+        <p class="text-gray-400 text-sm mt-2">Fetching blockchain data and calculating risk factors</p>
+    </div>
+</div>
+
+<!-- Analysis Results -->
+<div id="analysis-results" class="hidden">
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <!-- Risk Score -->
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+            <p class="text-sm text-gray-600 mb-2">Risk Score</p>
+            <span id="risk-score" class="text-5xl font-bold">--</span>
+            <div class="mt-3 bg-gray-200 rounded-full h-3">
+                <div id="risk-bar" class="h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="risk-level" class="mt-2 text-sm font-semibold">--</p>
+        </div>
+
+        <!-- Recommendation -->
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+            <p class="text-sm text-gray-600 mb-2">Recommendation</p>
+            <span id="recommendation" class="text-3xl font-bold">--</span>
+        </div>
+
+        <!-- ALGO Balance -->
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+            <p class="text-sm text-gray-600 mb-2">ALGO Balance</p>
+            <span id="algo-balance" class="text-3xl font-bold text-blue-600">--</span>
+            <p class="text-sm text-gray-400 mt-1">ALGO</p>
+        </div>
+
+        <!-- Transaction Count -->
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+            <p class="text-sm text-gray-600 mb-2">Transactions</p>
+            <span id="tx-count" class="text-3xl font-bold text-purple-600">--</span>
+            <p class="text-sm text-gray-400 mt-1">Total</p>
+        </div>
+    </div>
+
+    <!-- Detailed Results Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Funds & Assets -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                    </path>
+                </svg>
+                Funds & Assets
+            </h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Balance</span>
+                    <span id="funds-balance" class="font-semibold">-- ALGO</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Min Balance</span>
+                    <span id="funds-min-balance" class="font-semibold">-- ALGO</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Assets Count</span>
+                    <span id="funds-assets-count" class="font-semibold">--</span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <span class="text-gray-600">Account Status</span>
+                    <span id="funds-status" class="font-semibold">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Summary -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                    </path>
+                </svg>
+                Transaction Summary
+            </h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Total Transactions</span>
+                    <span id="tx-total" class="font-semibold">--</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Total Volume</span>
+                    <span id="tx-volume" class="font-semibold">-- ALGO</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Average Amount</span>
+                    <span id="tx-avg" class="font-semibold">-- ALGO</span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <span class="text-gray-600">Unique Counterparties</span>
+                    <span id="tx-counterparties" class="font-semibold">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Factors -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                </path>
+            </svg>
+            Risk Factors
+        </h3>
+        <div id="risk-factors" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Risk factors will be populated here -->
+        </div>
+    </div>
+
+    <!-- Flags & Warnings -->
+    <div id="flags-section" class="bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path>
+            </svg>
+            Flags & Warnings
+        </h3>
+        <div id="flags-list" class="space-y-3">
+            <!-- Flags will be populated here -->
+        </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Suggestions
+        </h3>
+        <ul id="suggestions-list" class="space-y-2">
+            <!-- Suggestions will be populated here -->
+        </ul>
+    </div>
+
+    <!-- Reputation -->
+    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl shadow-lg p-6 mb-8">
+        <h3 class="text-lg font-semibold mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                </path>
+            </svg>
+            Address Reputation
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <p class="text-sm text-purple-200">Reputation Score</p>
+                <p id="rep-score" class="text-2xl font-bold">--</p>
+            </div>
+            <div>
+                <p class="text-sm text-purple-200">Trust Tier</p>
+                <p id="rep-tier" class="text-2xl font-bold">--</p>
+            </div>
+            <div>
+                <p class="text-sm text-purple-200">Pattern Score</p>
+                <p id="pattern-score" class="text-2xl font-bold">--</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col md:flex-row gap-4">
+        <button onclick="window.location.href='/vault'"
+            class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition">
+            Setup Vault Protection
+        </button>
+        <button onclick="window.location.href='/chatbot'"
+            class="flex-1 bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-purple-700 transition">
+            Ask AI About This Address
+        </button>
+        <button onclick="resetAnalysis()"
+            class="flex-1 bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 transition">
+            Analyze Another
+        </button>
+    </div>
+</div>
+
+<script>
+    async function analyzeAddress(event) {
+        event.preventDefault();
+
+        const address = document.getElementById('address').value.trim();
+        if (!address) {
+            alert('Please enter an Algorand address');
+            return;
+        }
+
+        const btn = document.getElementById('analyze-btn');
+        btn.disabled = true;
+        btn.textContent = 'Analyzing...';
+
+        // Show loading state
+        document.getElementById('loading-state').classList.remove('hidden');
+        document.getElementById('analysis-results').classList.add('hidden');
+
+        try {
+            const response = await fetch('/api/analysis/simple', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: address })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                displayResults(result);
+            } else {
+                alert('Analysis failed: ' + (result.detail || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error analyzing address:', error);
+            alert('Failed to analyze address');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Analyze';
+            document.getElementById('loading-state').classList.add('hidden');
+        }
+    }
+
+    function displayResults(result) {
+        document.getElementById('analysis-results').classList.remove('hidden');
+
+        // Risk Score
+        const riskScore = result.risk_score;
+        document.getElementById('risk-score').textContent = riskScore;
+        document.getElementById('risk-bar').style.width = `${riskScore}%`;
+
+        // Risk bar color
+        const riskBar = document.getElementById('risk-bar');
+        const riskLevel = document.getElementById('risk-level');
+        if (riskScore >= 80) {
+            riskBar.className = 'h-3 rounded-full transition-all duration-500 bg-red-500';
+            riskLevel.textContent = 'VERY HIGH';
+            riskLevel.className = 'mt-2 text-sm font-semibold text-red-600';
+        } else if (riskScore >= 60) {
+            riskBar.className = 'h-3 rounded-full transition-all duration-500 bg-orange-500';
+            riskLevel.textContent = 'HIGH';
+            riskLevel.className = 'mt-2 text-sm font-semibold text-orange-600';
+        } else if (riskScore >= 40) {
+            riskBar.className = 'h-3 rounded-full transition-all duration-500 bg-yellow-500';
+            riskLevel.textContent = 'MEDIUM';
+            riskLevel.className = 'mt-2 text-sm font-semibold text-yellow-600';
+        } else if (riskScore >= 20) {
+            riskBar.className = 'h-3 rounded-full transition-all duration-500 bg-green-400';
+            riskLevel.textContent = 'LOW';
+            riskLevel.className = 'mt-2 text-sm font-semibold text-green-500';
+        } else {
+            riskBar.className = 'h-3 rounded-full transition-all duration-500 bg-green-500';
+            riskLevel.textContent = 'VERY LOW';
+            riskLevel.className = 'mt-2 text-sm font-semibold text-green-600';
+        }
+
+        // Recommendation
+        const recEl = document.getElementById('recommendation');
+        recEl.textContent = result.recommendation;
+        if (result.recommendation === 'ALLOW') {
+            recEl.className = 'text-3xl font-bold text-green-600';
+        } else if (result.recommendation === 'WARN') {
+            recEl.className = 'text-3xl font-bold text-yellow-600';
+        } else {
+            recEl.className = 'text-3xl font-bold text-red-600';
+        }
+
+        // ALGO Balance
+        document.getElementById('algo-balance').textContent = result.funds.algo_balance.toFixed(2);
+
+        // Transaction Count
+        document.getElementById('tx-count').textContent = result.transaction_summary.total_transactions;
+
+        // Funds & Assets
+        document.getElementById('funds-balance').textContent = `${result.funds.algo_balance.toFixed(4)} ALGO`;
+        document.getElementById('funds-min-balance').textContent = `${(result.funds.min_balance / 1000000).toFixed(4)} ALGO`;
+        document.getElementById('funds-assets-count').textContent = result.funds.assets_count;
+        document.getElementById('funds-status').textContent = result.funds.status;
+
+        // Transaction Summary
+        document.getElementById('tx-total').textContent = result.transaction_summary.total_transactions;
+        document.getElementById('tx-volume').textContent = `${result.transaction_summary.total_volume.toFixed(2)} ALGO`;
+        document.getElementById('tx-avg').textContent = `${result.transaction_summary.average_amount.toFixed(4)} ALGO`;
+        document.getElementById('tx-counterparties').textContent = result.transaction_summary.unique_counterparties;
+
+        // Risk Factors
+        const riskFactorsContainer = document.getElementById('risk-factors');
+        riskFactorsContainer.innerHTML = '';
+
+        for (const [key, factor] of Object.entries(result.risk_factors)) {
+            const score = factor.score || 50;
+            const status = factor.status || 'Unknown';
+
+            let bgColor = 'bg-green-50 border-green-200';
+            let textColor = 'text-green-700';
+            let iconColor = 'text-green-500';
+
+            if (score >= 70) {
+                bgColor = 'bg-red-50 border-red-200';
+                textColor = 'text-red-700';
+                iconColor = 'text-red-500';
+            } else if (score >= 50) {
+                bgColor = 'bg-yellow-50 border-yellow-200';
+                textColor = 'text-yellow-700';
+                iconColor = 'text-yellow-500';
+            }
+
+            const factorHtml = `
+                <div class="${bgColor} border rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium ${textColor}">${formatFactorName(key)}</span>
+                        <span class="text-lg font-bold ${textColor}">${score}</span>
+                    </div>
+                    <p class="text-sm text-gray-600">${status}</p>
+                    <div class="mt-2 bg-gray-200 rounded-full h-1.5">
+                        <div class="h-1.5 rounded-full ${score >= 70 ? 'bg-red-500' : score >= 50 ? 'bg-yellow-500' : 'bg-green-500'}" style="width: ${score}%"></div>
+                    </div>
+                </div>
+            `;
+            riskFactorsContainer.innerHTML += factorHtml;
+        }
+
+        // Flags
+        const flagsSection = document.getElementById('flags-section');
+        const flagsList = document.getElementById('flags-list');
+
+        if (result.flags && result.flags.length > 0) {
+            flagsSection.classList.remove('hidden');
+            flagsList.innerHTML = '';
+
+            result.flags.forEach(flag => {
+                let bgColor = 'bg-yellow-50 border-yellow-200';
+                let textColor = 'text-yellow-700';
+                let iconPath = 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z';
+
+                if (flag.severity === 'high') {
+                    bgColor = 'bg-red-50 border-red-200';
+                    textColor = 'text-red-700';
+                } else if (flag.type === 'info') {
+                    bgColor = 'bg-blue-50 border-blue-200';
+                    textColor = 'text-blue-700';
+                }
+
+                const flagHtml = `
+                    <div class="${bgColor} border rounded-lg p-4 flex items-center">
+                        <svg class="w-5 h-5 ${textColor} mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}"></path>
+                        </svg>
+                        <span class="${textColor}">${flag.message}</span>
+                    </div>
+                `;
+                flagsList.innerHTML += flagHtml;
+            });
+        } else {
+            flagsSection.classList.add('hidden');
+        }
+
+        // Suggestions
+        const suggestionsList = document.getElementById('suggestions-list');
+        suggestionsList.innerHTML = '';
+
+        result.suggestions.forEach(suggestion => {
+            const suggestionHtml = `
+                <li class="flex items-start">
+                    <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-gray-700">${suggestion}</span>
+                </li>
+            `;
+            suggestionsList.innerHTML += suggestionHtml;
+        });
+
+        // Reputation
+        document.getElementById('rep-score').textContent = result.reputation.score || '--';
+        document.getElementById('rep-tier').textContent = result.reputation.tier || '--';
+        document.getElementById('pattern-score').textContent = result.pattern_score || '--';
+    }
+
+    function formatFactorName(name) {
+        return name.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+
+    function resetAnalysis() {
+        document.getElementById('address').value = '';
+        document.getElementById('analysis-results').classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+{% endblock %}

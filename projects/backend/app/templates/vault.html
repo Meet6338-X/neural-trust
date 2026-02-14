@@ -107,6 +107,38 @@
                 <p id="vault-status-display" class="font-semibold">--</p>
             </div>
         </div>
+
+        <!-- Freeze/Unfreeze Buttons -->
+        <div class="mt-6 pt-6 border-t border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Emergency Controls</h3>
+            <div class="flex flex-col md:flex-row gap-4">
+                <button id="freeze-btn" onclick="freezeVault()"
+                    class="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-700 transition">
+                    <span class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                            </path>
+                        </svg>
+                        <span>Freeze Vault</span>
+                    </span>
+                </button>
+                <button id="unfreeze-btn" onclick="unfreezeVault()"
+                    class="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition hidden">
+                    <span class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        <span>Unfreeze Vault</span>
+                    </span>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+                Freezing your vault will block all transactions immediately. Use this for emergency protection.
+            </p>
+        </div>
     </div>
 </div>
 
@@ -268,12 +300,19 @@
         document.getElementById('current-risk-display').textContent = data.current_risk_score || 0;
 
         const statusDisplay = document.getElementById('vault-status-display');
+        const freezeBtn = document.getElementById('freeze-btn');
+        const unfreezeBtn = document.getElementById('unfreeze-btn');
+
         if (data.is_frozen) {
             statusDisplay.textContent = 'FROZEN';
             statusDisplay.className = 'font-semibold text-red-600';
+            freezeBtn.classList.add('hidden');
+            unfreezeBtn.classList.remove('hidden');
         } else {
             statusDisplay.textContent = 'ACTIVE';
             statusDisplay.className = 'font-semibold text-green-600';
+            freezeBtn.classList.remove('hidden');
+            unfreezeBtn.classList.add('hidden');
         }
 
         // Set update threshold to current value
@@ -377,6 +416,87 @@
         } finally {
             btn.disabled = false;
             btn.textContent = 'Update Vault Threshold';
+        }
+    }
+
+    async function freezeVault() {
+        if (!connectedWallet) {
+            alert('Please connect your wallet first');
+            return;
+        }
+
+        const reason = prompt('Enter reason for freezing (optional):') || 'Emergency freeze';
+
+        if (!confirm('Are you sure you want to FREEZE your vault? This will block all transactions immediately.')) {
+            return;
+        }
+
+        const btn = document.getElementById('freeze-btn');
+        btn.disabled = true;
+        btn.textContent = 'Freezing...';
+
+        try {
+            const response = await fetch('/api/vault/freeze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_address: connectedWallet,
+                    reason: reason
+                })
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('Vault frozen successfully! All transactions are now blocked.');
+                loadVaultStatus();
+            } else {
+                alert('Failed to freeze vault: ' + (result.detail || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error freezing vault:', error);
+            alert('Failed to freeze vault');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="flex items-center justify-center space-x-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><span>Freeze Vault</span></span>';
+        }
+    }
+
+    async function unfreezeVault() {
+        if (!connectedWallet) {
+            alert('Please connect your wallet first');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to UNFREEZE your vault? This will allow transactions to resume.')) {
+            return;
+        }
+
+        const btn = document.getElementById('unfreeze-btn');
+        btn.disabled = true;
+        btn.textContent = 'Unfreezing...';
+
+        try {
+            const response = await fetch('/api/vault/unfreeze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_address: connectedWallet
+                })
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('Vault unfrozen successfully! Transactions are now allowed.');
+                loadVaultStatus();
+            } else {
+                alert('Failed to unfreeze vault: ' + (result.detail || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error unfreezing vault:', error);
+            alert('Failed to unfreeze vault');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="flex items-center justify-center space-x-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg><span>Unfreeze Vault</span></span>';
         }
     }
 </script>

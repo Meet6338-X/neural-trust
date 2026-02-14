@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1012877143568",
+    "project_id": "nerualtrust",
+    "storage_bucket": "nerualtrust.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012877143568:android:e0665888e4406da9dc2495",
+        "android_client_info": {
+          "package_name": "com.example.neuraltrust"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAffaJvwEUiPgv9qEUKjAO07KcGi9iH_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

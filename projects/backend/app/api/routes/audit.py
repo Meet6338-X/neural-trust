@@ -5,7 +5,8 @@ API routes for audit log endpoints.
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 import logging
 
 from app.models.schemas import AuditLogResponse, AuditEntry
@@ -15,6 +16,59 @@ from app.services.blockchain_service import get_blockchain_service, BlockchainSe
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/audit", tags=["audit"])
+
+
+@router.get("/log")
+async def get_general_audit_log(
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """
+    Get all audit log entries.
+    
+    Args:
+        limit: Maximum number of entries to return
+        offset: Number of entries to skip
+        db: Database session
+    
+    Returns:
+        Audit log entries
+    """
+    try:
+        # Get all audit entries from database
+        result = await db.execute(
+            select(AuditLog)
+            .order_by(AuditLog.timestamp.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        db_entries = result.scalars().all()
+        
+        # Convert to response format
+        entries = [
+            {
+                "id": entry.id,
+                "user_address": entry.user_address,
+                "risk_score": entry.risk_score,
+                "decision": entry.decision,
+                "timestamp": entry.timestamp.isoformat() if entry.timestamp else None,
+            }
+            for entry in db_entries
+        ]
+        
+        # Get total count
+        from sqlalchemy import func
+        count_result = await db.execute(
+            select(func.count(AuditLog.id))
+        )
+        total = count_result.scalar() or 0
+        
+        return {"entries": entries, "total": total, "limit": limit, "offset": offset}
+    except Exception as e:
+        logger.error(f"Failed to get audit log: {e}")
+        # Return empty result if database error
+        return {"entries": [], "total": 0, "limit": limit, "offset": offset}
 
 
 @router.get("/{address}", response_model=AuditLogResponse)

@@ -304,8 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Add loading state to forms
-    document.querySelectorAll('form').forEach(form => {
+    // Add loading state to forms (only for forms without data-async attribute)
+    document.querySelectorAll('form:not([data-async])').forEach(form => {
         form.addEventListener('submit', function () {
             const submitBtn = this.querySelector('button[type="submit"]');
             if (submitBtn) {

@@ -91,6 +91,23 @@ class Transaction(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class AddressRiskProfile(Base):
+    """Database model for address risk profiles."""
+    __tablename__ = "address_risk_profiles"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    address = Column(String(58), unique=True, index=True, nullable=False)
+    total_transactions = Column(Integer, default=0, nullable=False)
+    total_volume = Column(Float, default=0.0, nullable=False)
+    average_risk_score = Column(Float, default=0.0, nullable=False)
+    cumulative_risk_score = Column(Integer, default=0, nullable=False)
+    risk_trend = Column(String(20), default="stable", nullable=False)  # improving, stable, declining
+    reputation_tier = Column(String(20), default="moderate", nullable=False)  # trusted, moderate, caution, high_risk
+    last_analysis = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 # Async database engine
 async_engine = create_async_engine(
     settings.DATABASE_URL,
