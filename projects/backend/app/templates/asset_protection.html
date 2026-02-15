@@ -5,7 +5,8 @@
 {% block content %}
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Asset Protection</h1>
-    <p class="text-gray-600">Protect your digital assets by registering them on Algorand blockchain</p>
+    <p class="text-gray-600">Protect your digital assets with hybrid storage (local + IPFS) and Algorand blockchain
+        registration</p>
 </div>
 
 <!-- Protection Options -->
@@ -39,19 +40,33 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
 
-                <div>
-                    <label for="url-asset-type" class="block text-sm font-medium text-gray-700 mb-2">
-                        Asset Type
-                    </label>
-                    <select id="url-asset-type" name="asset_type" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select type...</option>
-                        <option value="certificate">Certificate</option>
-                        <option value="document">Document</option>
-                        <option value="image">Image</option>
-                        <option value="credit_file">Credit File</option>
-                        <option value="other">Other</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="url-asset-type" class="block text-sm font-medium text-gray-700 mb-2">
+                            Asset Type
+                        </label>
+                        <select id="url-asset-type" name="asset_type" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select type...</option>
+                            <option value="certificate">Certificate</option>
+                            <option value="document">Document</option>
+                            <option value="image">Image</option>
+                            <option value="credit_file">Credit File</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="url-storage-type" class="block text-sm font-medium text-gray-700 mb-2">
+                            Storage Type
+                        </label>
+                        <select id="url-storage-type" name="storage_type" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="hybrid" selected>Hybrid (Recommended)</option>
+                            <option value="local">Local Only</option>
+                            <option value="ipfs">IPFS Only</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div>
@@ -98,19 +113,33 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                 </div>
 
-                <div>
-                    <label for="file-asset-type" class="block text-sm font-medium text-gray-700 mb-2">
-                        Asset Type
-                    </label>
-                    <select id="file-asset-type" name="asset_type" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                        <option value="">Select type...</option>
-                        <option value="certificate">Certificate</option>
-                        <option value="document">Document</option>
-                        <option value="image">Image</option>
-                        <option value="credit_file">Credit File</option>
-                        <option value="other">Other</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="file-asset-type" class="block text-sm font-medium text-gray-700 mb-2">
+                            Asset Type
+                        </label>
+                        <select id="file-asset-type" name="asset_type" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">Select type...</option>
+                            <option value="certificate">Certificate</option>
+                            <option value="document">Document</option>
+                            <option value="image">Image</option>
+                            <option value="credit_file">Credit File</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="file-storage-type" class="block text-sm font-medium text-gray-700 mb-2">
+                            Storage Type
+                        </label>
+                        <select id="file-storage-type" name="storage_type" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="hybrid" selected>Hybrid (Recommended)</option>
+                            <option value="local">Local Only</option>
+                            <option value="ipfs">IPFS Only</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div>
@@ -159,15 +188,132 @@
                 <p id="result-hash" class="font-mono text-sm text-gray-900 break-all">--</p>
             </div>
             <div>
-                <p class="text-sm text-gray-600">Verification URL</p>
-                <a id="result-verify-url" href="#" class="text-blue-600 hover:underline text-sm">--</a>
+                <p class="text-sm text-gray-600">Storage Type</p>
+                <p id="result-storage-type" class="text-sm text-gray-900 font-semibold">--</p>
             </div>
         </div>
 
-        <button onclick="resetForm()"
-            class="w-full bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 transition">
-            Protect Another Asset
-        </button>
+        <!-- Storage Locations -->
+        <div id="storage-locations" class="border-t pt-4 mt-4 hidden">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">Storage Locations</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Local Storage -->
+                <div id="local-storage-info" class="bg-gray-50 rounded-lg p-4 hidden">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4">
+                            </path>
+                        </svg>
+                        <span class="font-semibold text-gray-900">Local Storage</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">Stored on server</p>
+                    <button onclick="downloadAsset()" id="download-btn"
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                        Download File
+                    </button>
+                </div>
+
+                <!-- IPFS Storage -->
+                <div id="ipfs-storage-info" class="bg-gray-50 rounded-lg p-4 hidden">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9">
+                            </path>
+                        </svg>
+                        <span class="font-semibold text-gray-900">IPFS Storage</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-1">Decentralized storage</p>
+                    <p class="text-xs text-gray-500 mb-2 font-mono" id="ipfs-cid">--</p>
+                    <a id="ipfs-gateway-link" href="#" target="_blank"
+                        class="block w-full bg-purple-600 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-purple-700 transition text-center">
+                        Open in IPFS Gateway
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <button onclick="retrieveAsset()" id="retrieve-btn"
+                class="bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                Retrieve Asset Info
+            </button>
+            <a id="verify-link" href="#" target="_blank"
+                class="bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-purple-700 transition text-center">
+                Verify Asset
+            </a>
+            <button onclick="resetForm()"
+                class="bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 transition">
+                Protect Another
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Retrieve Section -->
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        Retrieve Asset
+    </h2>
+
+    <form id="retrieve-form" onsubmit="retrieveAssetById(event)">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <label for="retrieve-asset-id" class="block text-sm font-medium text-gray-700 mb-2">
+                    Asset ID
+                </label>
+                <input type="text" id="retrieve-asset-id" name="asset_id" required
+                    placeholder="Enter asset ID to retrieve"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="submit" id="retrieve-submit-btn"
+                    class="bg-indigo-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                    Retrieve
+                </button>
+                <button type="button" onclick="downloadById()"
+                    class="bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition">
+                    Download
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div id="retrieve-result" class="mt-4 hidden">
+        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+            <h3 class="font-semibold text-indigo-900 mb-2">Asset Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-indigo-700">Name: <span id="retrieve-name" class="font-semibold">--</span></p>
+                    <p class="text-indigo-700">Type: <span id="retrieve-type" class="font-semibold">--</span></p>
+                    <p class="text-indigo-700">Owner: <span id="retrieve-owner" class="font-mono text-xs">--</span></p>
+                </div>
+                <div>
+                    <p class="text-indigo-700">Timestamp: <span id="retrieve-timestamp">--</span></p>
+                    <p class="text-indigo-700">Storage: <span id="retrieve-storage">--</span></p>
+                    <p class="text-indigo-700">Hash: <span id="retrieve-hash" class="font-mono text-xs">--</span></p>
+                </div>
+            </div>
+            <div id="retrieve-options" class="mt-4 pt-4 border-t border-indigo-200 hidden">
+                <h4 class="font-semibold text-indigo-900 mb-2">Retrieval Options</h4>
+                <div class="flex flex-wrap gap-2">
+                    <a id="retrieve-download-link" href="#"
+                        class="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                        Download
+                    </a>
+                    <a id="retrieve-ipfs-link" href="#" target="_blank"
+                        class="bg-purple-600 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-purple-700 transition hidden">
+                        IPFS Gateway
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -210,8 +356,8 @@
 
 <!-- Info Card -->
 <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl shadow-lg p-6">
-    <h3 class="text-lg font-semibold mb-4">How Asset Protection Works</h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <h3 class="text-lg font-semibold mb-4">How Hybrid Asset Protection Works</h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="flex items-start space-x-3">
             <div class="bg-white/20 rounded-full p-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +367,19 @@
             </div>
             <div>
                 <p class="font-semibold">1. Submit</p>
-                <p class="text-sm text-purple-200">Provide URL or upload file</p>
+                <p class="text-sm text-purple-200">URL or file upload</p>
+            </div>
+        </div>
+        <div class="flex items-start space-x-3">
+            <div class="bg-white/20 rounded-full p-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="font-semibold">2. Store</p>
+                <p class="text-sm text-purple-200">Local + IPFS storage</p>
             </div>
         </div>
         <div class="flex items-start space-x-3">
@@ -233,8 +391,8 @@
                 </svg>
             </div>
             <div>
-                <p class="font-semibold">2. Hash</p>
-                <p class="text-sm text-purple-200">Create cryptographic hash</p>
+                <p class="font-semibold">3. Hash</p>
+                <p class="text-sm text-purple-200">Cryptographic hash</p>
             </div>
         </div>
         <div class="flex items-start space-x-3">
@@ -246,17 +404,24 @@
                 </svg>
             </div>
             <div>
-                <p class="font-semibold">3. Register</p>
-                <p class="text-sm text-purple-200">Store on Algorand blockchain</p>
+                <p class="font-semibold">4. Register</p>
+                <p class="text-sm text-purple-200">Algorand blockchain</p>
             </div>
         </div>
     </div>
-    <p class="mt-4 text-sm text-purple-200">
-        Your assets are protected with immutable proof of ownership and timestamp on the Algorand blockchain.
-    </p>
+    <div class="mt-4 p-4 bg-white/10 rounded-lg">
+        <p class="text-sm">
+            <strong>Storage Options:</strong><br>
+            • <strong>Hybrid (Recommended):</strong> Local + IPFS for maximum protection and availability<br>
+            • <strong>Local Only:</strong> Fast access, stored on server<br>
+            • <strong>IPFS Only:</strong> Decentralized, censorship-resistant storage
+        </p>
+    </div>
 </div>
 
 <script>
+    let currentAssetId = null;
+
     async function protectUrl(event) {
         event.preventDefault();
 
@@ -268,6 +433,7 @@
             url: document.getElementById('url-input').value,
             asset_name: document.getElementById('url-asset-name').value,
             asset_type: document.getElementById('url-asset-type').value,
+            storage_type: document.getElementById('url-storage-type').value,
             owner_address: document.getElementById('url-owner').value
         };
 
@@ -305,6 +471,7 @@
         formData.append('file', document.getElementById('file-input').files[0]);
         formData.append('asset_name', document.getElementById('file-asset-name').value);
         formData.append('asset_type', document.getElementById('file-asset-type').value);
+        formData.append('storage_type', document.getElementById('file-storage-type').value);
         formData.append('owner_address', document.getElementById('file-owner').value);
 
         try {
@@ -330,24 +497,136 @@
     }
 
     function showResult(result) {
+        currentAssetId = result.asset_id;
+
         document.getElementById('result-section').classList.remove('hidden');
         document.getElementById('result-message').textContent = result.message;
         document.getElementById('result-asset-id').textContent = result.asset_id;
         document.getElementById('result-tx-id').textContent = result.transaction_id;
         document.getElementById('result-hash').textContent = result.content_hash;
+        document.getElementById('result-storage-type').textContent = result.storage?.storage_type || 'hybrid';
 
+        // Show storage locations
+        const storageLocations = document.getElementById('storage-locations');
+        storageLocations.classList.remove('hidden');
+
+        const localStorageInfo = document.getElementById('local-storage-info');
+        const ipfsStorageInfo = document.getElementById('ipfs-storage-info');
+
+        const locations = result.storage?.locations || {};
+
+        // Local storage
+        if (locations.local && locations.local.available) {
+            localStorageInfo.classList.remove('hidden');
+        } else {
+            localStorageInfo.classList.add('hidden');
+        }
+
+        // IPFS storage
+        if (locations.ipfs && locations.ipfs.available) {
+            ipfsStorageInfo.classList.remove('hidden');
+            document.getElementById('ipfs-cid').textContent = locations.ipfs.cid;
+            document.getElementById('ipfs-gateway-link').href = locations.ipfs.gateway_url;
+        } else {
+            ipfsStorageInfo.classList.add('hidden');
+        }
+
+        // Verify link
         const verifyUrl = window.location.origin + result.verification_url;
-        document.getElementById('result-verify-url').href = verifyUrl;
-        document.getElementById('result-verify-url').textContent = verifyUrl;
+        document.getElementById('verify-link').href = verifyUrl;
 
         // Scroll to result
         document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function downloadAsset() {
+        if (currentAssetId) {
+            window.location.href = `/api/asset-protection/download/${currentAssetId}`;
+        }
+    }
+
+    function retrieveAsset() {
+        if (currentAssetId) {
+            document.getElementById('retrieve-asset-id').value = currentAssetId;
+            retrieveAssetById(new Event('submit'));
+        }
+    }
+
+    async function retrieveAssetById(event) {
+        event.preventDefault();
+
+        const assetId = document.getElementById('retrieve-asset-id').value;
+        if (!assetId) {
+            alert('Please enter an Asset ID');
+            return;
+        }
+
+        const btn = document.getElementById('retrieve-submit-btn');
+        btn.disabled = true;
+        btn.textContent = 'Retrieving...';
+
+        try {
+            const response = await fetch(`/api/asset-protection/retrieve/${assetId}`);
+            const result = await response.json();
+
+            const retrieveResult = document.getElementById('retrieve-result');
+            retrieveResult.classList.remove('hidden');
+
+            if (response.ok && result.success) {
+                document.getElementById('retrieve-name').textContent = result.name || '--';
+                document.getElementById('retrieve-type').textContent = result.type || '--';
+                document.getElementById('retrieve-owner').textContent = result.owner || '--';
+                document.getElementById('retrieve-timestamp').textContent = result.timestamp || '--';
+                document.getElementById('retrieve-storage').textContent = result.storage_type || '--';
+                document.getElementById('retrieve-hash').textContent = result.content_hash ? result.content_hash.substring(0, 20) + '...' : '--';
+
+                // Show retrieval options
+                const retrieveOptions = document.getElementById('retrieve-options');
+                retrieveOptions.classList.remove('hidden');
+
+                // Download link
+                document.getElementById('retrieve-download-link').href = `/api/asset-protection/download/${assetId}`;
+
+                // IPFS link
+                const ipfsLink = document.getElementById('retrieve-ipfs-link');
+                if (result.retrieval_options?.ipfs?.gateway_url) {
+                    ipfsLink.href = result.retrieval_options.ipfs.gateway_url;
+                    ipfsLink.classList.remove('hidden');
+                } else {
+                    ipfsLink.classList.add('hidden');
+                }
+            } else {
+                document.getElementById('retrieve-name').textContent = 'Not found';
+                document.getElementById('retrieve-type').textContent = '--';
+                document.getElementById('retrieve-owner').textContent = '--';
+                document.getElementById('retrieve-timestamp').textContent = '--';
+                document.getElementById('retrieve-storage').textContent = '--';
+                document.getElementById('retrieve-hash').textContent = '--';
+                document.getElementById('retrieve-options').classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Error retrieving asset:', error);
+            alert('Failed to retrieve asset');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Retrieve';
+        }
+    }
+
+    function downloadById() {
+        const assetId = document.getElementById('retrieve-asset-id').value;
+        if (assetId) {
+            window.location.href = `/api/asset-protection/download/${assetId}`;
+        } else {
+            alert('Please enter an Asset ID');
+        }
     }
 
     function resetForm() {
         document.getElementById('result-section').classList.add('hidden');
         document.getElementById('url-form').reset();
         document.getElementById('file-form').reset();
+        currentAssetId = null;
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -368,9 +647,15 @@
             verifyResult.classList.remove('hidden');
 
             if (result.verified) {
-                document.getElementById('verify-message').innerHTML =
-                    `<span class="font-semibold">✓ Asset Verified</span><br>
-                    <span class="text-sm">Registered on ${result.network} at ${result.timestamp}</span>`;
+                let message = `<span class="font-semibold">✓ Asset Verified</span><br>`;
+                message += `<span class="text-sm">Registered on ${result.network} at ${result.timestamp}</span>`;
+
+                if (result.asset) {
+                    message += `<br><span class="text-sm">Asset: ${result.asset.name} (${result.asset.type})</span>`;
+                    message += `<br><span class="text-sm">Owner: ${result.asset.owner?.substring(0, 20)}...</span>`;
+                }
+
+                document.getElementById('verify-message').innerHTML = message;
             } else {
                 document.getElementById('verify-message').textContent = 'Asset not found or verification failed';
             }

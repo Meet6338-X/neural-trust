@@ -1,0 +1,23 @@
+{
+  "asset_id": "asset_aad7e668e98d",
+  "name": "Certificate",
+  "type": "certificate",
+  "url": "https://aistudio.google.com/apps/drive/1NcBCq3DMTi6JJy9tut6gMhKIS9SQ2gCO?fullscreenApplet=true&showPreview=true&showAssistant=true",
+  "content_hash": "aa174892b9a75df67cab0ebb64c3eedf6d15e8e2199f860ab34f631d04f1cf94",
+  "owner": "RCER4VPLMA4OC6T4RZHJQ3TYWIUW2I4G64CKECZ7GEWOEZNMGFPL2AK4GM",
+  "timestamp": "2026-02-15T04:02:28.633715",
+  "content_type": "text/html; charset=utf-8",
+  "size": 1264452,
+  "storage_type": "ipfs",
+  "storage_locations": {
+    "ipfs": {
+      "available": true,
+      "cid": "Qmej5wjedogpx4m644ds4p6wjk2nzs46f6",
+      "gateway_url": "https://ipfs.io/ipfs/Qmej5wjedogpx4m644ds4p6wjk2nzs46f6",
+      "simulated": true,
+      "error": "",
+      "note": "IPFS upload simulated - integrate with pinning service for production"
+    }
+  },
+  "custom_metadata": {}
+}

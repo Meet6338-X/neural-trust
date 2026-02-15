@@ -1,0 +1,21 @@
+{
+  "asset_id": "asset_75c484f58a26",
+  "name": "Certificate",
+  "type": "certificate",
+  "url": "https://aistudio.google.com/apps/drive/1NcBCq3DMTi6JJy9tut6gMhKIS9SQ2gCO?fullscreenApplet=true&showPreview=true&showAssistant=true",
+  "content_hash": "38d7bd3ced3d91e8506769737a736288f442df2b289e451bb90b5ce15b1dd76c",
+  "owner": "RCER4VPLMA4OC6T4RZHJQ3TYWIUW2I4G64CKECZ7GEWOEZNMGFPL2AK4GM",
+  "timestamp": "2026-02-15T04:02:03.442790",
+  "content_type": "text/html; charset=utf-8",
+  "size": 1264741,
+  "storage_type": "local",
+  "storage_locations": {
+    "local": {
+      "available": true,
+      "path": "protected_assets\\local\\asset_75c484f58a26\\asset_asset_75c484f58a26",
+      "filename": "asset_asset_75c484f58a26",
+      "size": 1264741
+    }
+  },
+  "custom_metadata": {}
+}
